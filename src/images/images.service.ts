@@ -22,14 +22,18 @@ export class ImagesService {
   async saveFile(imageUrl: string, userId: string): Promise<ImageDto> {
     try {
       const name = './images/' + userId + '.jpeg';
+
       const img = await lastValueFrom(
         this.httpService.get(imageUrl, { responseType: 'arraybuffer' }),
       );
       const buffer = Buffer.from(img.data, 'base64');
+
       fs.writeFileSync(name, buffer, { encoding: 'base64' });
+
       await lastValueFrom(
         this.httpService.post(this.url + '/images', { userId, path: name }),
       );
+
       return new ImageDto(buffer.toString('base64'));
     } catch (error) {
       return;
@@ -37,10 +41,17 @@ export class ImagesService {
   }
 
   async deleteFile(userId: string): Promise<boolean> {
-    fs.unlinkSync(`./images/${userId}.jpeg`);
-    const response = await lastValueFrom(
-      this.httpService.delete(this.url + '/' + userId),
-    );
-    return response.status === 204;
+    try {
+      const exists = fs.existsSync(`./images/${userId}.jpeg`);
+      if (!exists) return false;
+
+      fs.unlinkSync(`./images/${userId}.jpeg`);
+      const response = await lastValueFrom(
+        this.httpService.delete(this.url + '/' + userId),
+      );
+      return response.status === 204;
+    } catch (error) {
+      return false;
+    }
   }
 }

@@ -50,6 +50,7 @@ export class EmailsService {
         this.config,
       ),
     );
-    return response.status === 202 || response.status === 201;
+
+    return response.status === 202;
   }
 }

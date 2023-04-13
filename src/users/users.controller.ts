@@ -61,7 +61,7 @@ export class UsersController {
   async remove(@Param('id') id: string): Promise<ResponseInterface> {
     try {
       this.client.emit<any>('dele_avatar', id);
-      await this.usersService.remove(id);
+      if (!(await this.usersService.remove(id))) throw new Error('not_found');
       return new ResponseSuccessDto('Image deleted');
     } catch (error) {
       return new ResponseErrorDto('Image not found', HttpStatus.NOT_FOUND);

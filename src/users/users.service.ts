@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { EmailsService } from 'src/emails/emails.service';
+import { EmailsService } from '../emails/emails.service';
 import { UserEntity } from './entities/user.entity';
 import { ImageDto } from './dto/image.dto';
 
@@ -43,7 +43,9 @@ export class UsersService {
     let user: UserEntity;
     if (response.data.data != undefined) user = response.data.data;
     else user = response.data;
+
     const image = await this.imagesService.getFile(user.id, user.avatar);
+
     return image;
   }
 
