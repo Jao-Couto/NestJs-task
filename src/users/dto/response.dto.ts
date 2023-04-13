@@ -7,7 +7,6 @@ import { ResponseInterface } from '../interfaces/response.interface';
 export class ResponseErrorDto implements ResponseInterface {
   constructor(infoMessage: string, status?: HttpStatus) {
     this.success = false;
-    this.message = infoMessage;
     this.data = new HttpException(infoMessage, status);
   }
   message: string;
