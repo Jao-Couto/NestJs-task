@@ -7,7 +7,6 @@ import { ImagesService } from '../images/images.service';
 import { UserEntity } from './entities/user.entity';
 import * as fs from 'fs';
 import { ImageDto } from './dto/image.dto';
-import { HttpStatus } from '@nestjs/common';
 
 describe('UsersService', () => {
   let userService: UsersService;
