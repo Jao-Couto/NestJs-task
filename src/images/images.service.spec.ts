@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ImagesService } from './images.service';
 import { HttpService } from '@nestjs/axios';
-import { of, lastValueFrom } from 'rxjs';
+import { of } from 'rxjs';
 import * as fs from 'fs';
 
 describe('ImagesService', () => {
