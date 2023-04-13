@@ -15,11 +15,11 @@ import { ResponseErrorDto, ResponseSuccessDto } from './dto/response.dto';
 import { ListUsuerDTO } from './dto/list-user.dto';
 import { ResponseInterface } from './interfaces/response.interface';
 
-@Controller('api')
+@Controller()
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    @Inject('HELLO_SERVICE') private readonly client: ClientProxy,
+    @Inject('USER_SERVICE') private readonly client: ClientProxy,
   ) {}
 
   @Post('users')
@@ -60,7 +60,7 @@ export class UsersController {
   @Delete('user/:id/avatar')
   async remove(@Param('id') id: string): Promise<ResponseInterface> {
     try {
-      this.client.emit<any>('dele_avatar', id);
+      this.client.emit<any>('delete_avatar', id);
       if (!(await this.usersService.remove(id))) throw new Error('not_found');
       return new ResponseSuccessDto('Image deleted');
     } catch (error) {

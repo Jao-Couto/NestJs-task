@@ -13,7 +13,7 @@ import { ImagesModule } from 'src/images/images.module';
     ImagesModule,
     ClientsModule.register([
       {
-        name: 'HELLO_SERVICE',
+        name: 'USER_SERVICE',
         transport: Transport.RMQ,
         options: {
           urls: ['amqp://admin:admin@localhost:5672'],
