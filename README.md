@@ -1,6 +1,6 @@
 
-## .env.development with RabbitMQ and MongoDb Atlas uri
-### if my MongoDb not available, just insert your link
+## .env.development with RabbitMQ and MongoDb Atlas URI
+If my MongoDb URI not available, just insert your link
 
 ## Installation
 
