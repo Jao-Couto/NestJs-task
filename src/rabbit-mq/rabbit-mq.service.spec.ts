@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RabbitMqService } from './rabbit-mq.service';
-import { ClientProxy, ClientsModule, Transport } from '@nestjs/microservices';
 
 describe('RabbitMqService', () => {
   let rabbitMqService: RabbitMqService;
