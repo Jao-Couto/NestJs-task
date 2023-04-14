@@ -33,3 +33,10 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+#images
+images/
+!images/.gitkeep
+
+#rabbitmq_data
+/.rabbitmq_data
