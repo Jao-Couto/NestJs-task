@@ -26,6 +26,22 @@ $ npm run start
 ```bash
 $ npm run test
 ```
+## Routes
+### POST /api/users
+#### Body
+```
+{
+    "email": "teste@gmail.com",
+    "first_name": "User",
+    "last_name": "Test",
+    "avatar": "https://reqres.in/img/faces/1-image.jpg"
+}
+```
+### GET /api/user/{userId}
+
+### GET /api/user/{userId}/avatar
+
+### DELETE /api/user/{userId}/avatar
 
 ## Support
 
