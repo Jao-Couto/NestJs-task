@@ -9,7 +9,7 @@ $ npm install
 ```
 
 ## Docker with RabbitMQ
-#### Need docker installed
+#### It needs docker installed
 
 ```bash
 $ docker-compose up
