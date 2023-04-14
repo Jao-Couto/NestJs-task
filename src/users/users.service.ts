@@ -26,7 +26,7 @@ export class UsersService {
     const id = (await this.countUsers()) + 1;
     //Create User
     const createdUser = new this.userModel({ id, ...createUserDto });
-    await createdUser.save();
+    const response = await createdUser.save();
 
     //Send Email
     await this.emailsService.sendMail({
@@ -38,15 +38,15 @@ export class UsersService {
     //Send RabbitMq Event
     await this.rabbitMqService.sendMessage({ userId: createdUser.id });
 
-    return createdUser;
+    return response;
   }
 
   async existsUserByEmail(email: string): Promise<boolean> {
-    return (await this.userModel.findOne({ email }).exec()) !== null;
+    return (await this.userModel.findOne({ email })) !== null;
   }
 
   async countUsers(): Promise<number> {
-    return await this.userModel.count().exec();
+    return await this.userModel.count();
   }
 
   async findOne(id: number): Promise<User> {
@@ -78,7 +78,6 @@ export class UsersService {
       !(await this.imagesService.deleteFile(user.avatarName))
     )
       return false;
-
     user.avatarName = '';
     await user.save();
     return true;
