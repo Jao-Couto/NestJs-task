@@ -1,17 +1,19 @@
 
+## .env.development with RabbitMQ and MongoDb Atlas uri
+### if my MongoDb not available, just insert your link
+
 ## Installation
 
 ```bash
 $ npm install
 ```
 
-## Docker for RabbitMQ
-# Need docker installed
+## Docker with RabbitMQ
+#### Need docker installed
 
 ```bash
 $ docker-compose up
 ```
-
 
 ## Running the app
 
