@@ -1,12 +1,12 @@
 export class ListUsuerDTO {
-  readonly id: string;
+  readonly id: number;
   readonly email: string;
   readonly first_name: string;
   readonly last_name: string;
   readonly avatar: string;
 
   constructor(user: {
-    id: string;
+    id: number;
     email: string;
     first_name: string;
     last_name: string;

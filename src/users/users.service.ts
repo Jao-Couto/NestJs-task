@@ -1,56 +1,86 @@
+import { RabbitMqService } from './../rabbit-mq/rabbit-mq.service';
 import { ImagesService } from './../images/images.service';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { EmailsService } from '../emails/emails.service';
-import { UserEntity } from './entities/user.entity';
 import { ImageDto } from './dto/image.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserDocument } from './schemas/user.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UsersService {
   constructor(
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private httpService: HttpService,
     private emailsService: EmailsService,
     private imagesService: ImagesService,
+    private rabbitMqService: RabbitMqService,
   ) {}
 
   private url = 'https://reqres.in/api/users';
 
-  async create(createUserDto: CreateUserDto): Promise<boolean> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const id = (await this.countUsers()) + 1;
+    //Create User
+    const createdUser = new this.userModel({ id, ...createUserDto });
+    await createdUser.save();
+
+    //Send Email
+    await this.emailsService.sendMail({
+      email: createUserDto.email,
+      first_name: createUserDto.first_name,
+      last_name: createUserDto.last_name,
+    });
+
+    //Send RabbitMq Event
+    await this.rabbitMqService.sendMessage({ userId: createdUser.id });
+
+    return createdUser;
+  }
+
+  async existsUserByEmail(email: string): Promise<boolean> {
+    return (await this.userModel.findOne({ email }).exec()) !== null;
+  }
+
+  async countUsers(): Promise<number> {
+    return await this.userModel.count().exec();
+  }
+
+  async findOne(id: number): Promise<User> {
     const response = await lastValueFrom(
-      this.httpService.post(this.url, createUserDto),
+      this.httpService.get(this.url + '/' + id),
     );
-    if (response.status === 201) {
-      return await this.emailsService.sendMail(response.data);
+    if (response.data.data != undefined) return response.data.data;
+    return response.data;
+  }
+
+  async findOneAvatar(id: number): Promise<ImageDto> {
+    const user: User = await this.userModel.findOne({ id });
+    if (user.avatarName) {
+      const res = await this.imagesService.getFile(user.avatarName);
+      if (res.image) return { image: res.image };
     }
-    return response.status === 201;
+
+    const image = await this.imagesService.saveFile(user.avatar);
+    await this.userModel.findByIdAndUpdate(user._id, {
+      $set: { avatarName: image.name },
+    });
+    return { image: image.image };
   }
 
-  async findOne(id: string): Promise<UserEntity> {
-    const response = await lastValueFrom(
-      this.httpService.get(this.url + '/' + id),
-    );
-    if (response.data.data != undefined)
-      return new UserEntity(response.data.data);
-    return new UserEntity(response.data);
-  }
+  async remove(id: number): Promise<boolean> {
+    const user: User = await this.userModel.findOne({ id });
+    if (
+      !user.avatarName ||
+      !(await this.imagesService.deleteFile(user.avatarName))
+    )
+      return false;
 
-  async findOneAvatar(id: string): Promise<ImageDto> {
-    const response = await lastValueFrom(
-      this.httpService.get(this.url + '/' + id),
-    );
-    let user: UserEntity;
-    if (response.data.data != undefined) user = response.data.data;
-    else user = response.data;
-
-    const image = await this.imagesService.getFile(user.id, user.avatar);
-
-    return image;
-  }
-
-  async remove(id: string): Promise<boolean> {
-    const fileDeleted = this.imagesService.deleteFile(id);
-    return fileDeleted;
+    user.avatarName = '';
+    await user.save();
+    return true;
   }
 }

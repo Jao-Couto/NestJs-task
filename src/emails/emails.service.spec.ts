@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailsService } from './emails.service';
 import { HttpService } from '@nestjs/axios';
-import { UserInfo } from 'src/images/dto/user-info.dto';
+import { UserInfo } from './dto/user-info.dto';
 import { of } from 'rxjs';
 
 describe('EmailsService', () => {

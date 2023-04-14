@@ -4,9 +4,9 @@ import { UsersService } from './users.service';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
 import { ImagesService } from '../images/images.service';
-import { UserEntity } from './entities/user.entity';
 import * as fs from 'fs';
 import { ImageDto } from './dto/image.dto';
+import { User } from './schemas/user.schema';
 
 describe('UsersService', () => {
   let userService: UsersService;
@@ -93,7 +93,7 @@ describe('UsersService', () => {
         last_name: 'Bluth',
         avatar: 'https://reqres.in/img/faces/1-image.jpg',
       };
-      const expectResult: UserEntity = new UserEntity(data);
+      const expectResult: User = new User(data);
       //Act
 
       mockRepositor.get.mockReturnValue(

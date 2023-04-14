@@ -5,40 +5,33 @@ import {
   Body,
   Param,
   Delete,
-  Inject,
   HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ClientProxy } from '@nestjs/microservices';
 import { ResponseErrorDto, ResponseSuccessDto } from './dto/response.dto';
 import { ListUsuerDTO } from './dto/list-user.dto';
 import { ResponseInterface } from './interfaces/response.interface';
 
 @Controller()
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    @Inject('USER_SERVICE') private readonly client: ClientProxy,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post('users')
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<ResponseInterface> {
     try {
-      this.client.emit<any>('create_user', createUserDto);
-      await this.usersService.create(createUserDto);
-      return new ResponseSuccessDto('User created');
+      const userCreated = await this.usersService.create(createUserDto);
+      return new ResponseSuccessDto('User created', userCreated);
     } catch (error) {
       return new ResponseErrorDto('User not created', HttpStatus.FORBIDDEN);
     }
   }
 
   @Get('user/:id')
-  async findOne(@Param('id') id: string): Promise<ResponseInterface> {
+  async findOne(@Param('id') id: number): Promise<ResponseInterface> {
     try {
-      this.client.emit<any>('find_user', id);
       const user = new ListUsuerDTO(await this.usersService.findOne(id));
       return new ResponseSuccessDto('User found', user);
     } catch (error) {
@@ -47,9 +40,8 @@ export class UsersController {
   }
 
   @Get('user/:id/avatar')
-  async findOneAvatar(@Param('id') id: string): Promise<ResponseInterface> {
+  async findOneAvatar(@Param('id') id: number): Promise<ResponseInterface> {
     try {
-      this.client.emit<any>('find_avatar', id);
       const image = await this.usersService.findOneAvatar(id);
       return new ResponseSuccessDto('Avatar found', image);
     } catch (error) {
@@ -58,9 +50,8 @@ export class UsersController {
   }
 
   @Delete('user/:id/avatar')
-  async remove(@Param('id') id: string): Promise<ResponseInterface> {
+  async remove(@Param('id') id: number): Promise<ResponseInterface> {
     try {
-      this.client.emit<any>('delete_avatar', id);
       if (!(await this.usersService.remove(id))) throw new Error('not_found');
       return new ResponseSuccessDto('Image deleted');
     } catch (error) {

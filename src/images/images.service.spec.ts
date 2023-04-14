@@ -3,12 +3,16 @@ import { ImagesService } from './images.service';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
 import * as fs from 'fs';
+import { v4 as uuid } from 'uuid';
+import { ImageDto } from './dto/image.dto';
+
+jest.mock('fs');
+jest.mock('uuid');
 
 describe('ImagesService', () => {
   let imagesService: ImagesService;
   let httpService: HttpService;
   const mockRepositor = {
-    post: jest.fn(),
     get: jest.fn(),
     delete: jest.fn(),
   };
@@ -38,39 +42,30 @@ describe('ImagesService', () => {
   describe('saveImage', () => {
     it('should save image with success', async () => {
       //Arrange
-      const user = {
-        id: '10',
-        avatar: 'https://reqres.in/img/faces/10-image.jpg',
-      };
-      const img = fs.readFileSync('src/images/imageTest/10.jpeg');
-      const postResponse = {
-        userId: '10',
-        path: './images/10.jpeg',
-      };
+      const buffer = Buffer.from([1, 2, 3]);
+      const url = 'https://example.com/avatar.jpg';
+      const name = 'b42e94e3-ab0d-4e88-9dbb-9777df1724af';
       //Act
 
       mockRepositor.get.mockReturnValue(
         of({
-          data: img,
+          data: buffer,
           headers: {},
           config: {},
           status: 200,
           statusText: 'OK',
         }),
       );
+      (uuid as jest.Mock).mockReturnValueOnce(name);
+      (fs.writeFileSync as jest.Mock).mockReturnValueOnce(undefined);
 
-      mockRepositor.post.mockReturnValue(
-        of({
-          data: postResponse,
-          headers: {},
-          config: {},
-          status: 200,
-          statusText: 'OK',
-        }),
+      const result = await imagesService.saveFile(url);
+      const resultExpected = new ImageDto(
+        buffer.toString('base64'),
+        name + '.jpeg',
       );
-      const result = imagesService.saveFile(user.avatar, user.id);
       //Assert
-      expect(result).toBeTruthy();
+      expect(result).toEqual(resultExpected);
       expect(httpService.get).toBeCalledTimes(1);
     });
   });
@@ -78,35 +73,30 @@ describe('ImagesService', () => {
   describe('getImage', () => {
     it('should get image with success', async () => {
       //Arrange
-      const user = {
-        id: '10',
-        avatar: 'https://reqres.in/img/faces/10-image.jpg',
-      };
+      const res = Buffer.from('a-base64-image').toString('base64');
+      const name = 'b42e94e3-ab0d-4e88-9dbb-9777df1724af';
+      (fs.readFileSync as jest.Mock).mockReturnValueOnce(res);
       //Act
-      const result = await imagesService.getFile(user.id, user.avatar);
+      const result = await imagesService.getFile(name);
+      const resultExpected = new ImageDto(res);
 
       //Assert
-      expect(result).toBeTruthy();
+      expect(result).toEqual(resultExpected);
     });
   });
 
   describe('deleteImage', () => {
     it('should delete image with success', async () => {
       //Arrange
+      const name = 'b42e94e3-ab0d-4e88-9dbb-9777df1724af';
+      (fs.unlinkSync as jest.Mock).mockReturnValueOnce(undefined);
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+
       //Act
-      mockRepositor.delete.mockReturnValue(
-        of({
-          data: true,
-          headers: {},
-          config: {},
-          status: 204,
-          statusText: 'No Content',
-        }),
-      );
-      const result = imagesService.deleteFile('10');
+      const result = imagesService.deleteFile(name);
+
       //Assert
       expect(result).toBeTruthy();
-      expect(httpService.delete).toBeCalledTimes(1);
     });
   });
 });
