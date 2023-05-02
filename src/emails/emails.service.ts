@@ -10,7 +10,7 @@ export class EmailsService {
   private config = {
     headers: {
       Authorization:
-        'Bearer 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',
+        'Bearer TOKEN',
     },
   };
 
